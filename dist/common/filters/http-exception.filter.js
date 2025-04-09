@@ -13,11 +13,11 @@ let HttpExceptionFilter = class HttpExceptionFilter {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
         const status = exception.getStatus();
-        const message = exception.message;
+        const message = exception.message || 'An unexpected error occurred';
         response.status(status).json({
             statusCode: status,
             message: message,
-            error: 'Internal Server Error',
+            error: exception.name || 'Internal Server Error',
         });
     }
 };

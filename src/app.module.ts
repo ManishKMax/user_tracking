@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LocationModule } from './location/location.module';
-import { UserTracking } from './users/entity/user-tracking.entity';
-import { UserCheckHistory } from './users/entity/user-check-history.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import configuration from './common/config/configuration';
+import { TrackingEvent } from './user_track/entities/tracking-event/tracking-event';
+import { UserTrackingSummary } from './user_track/entities/user-tracking-summary/user-tracking-summary';
+import { TrackingModule } from './user_track/user_track.module';
 
 // Validation for environment variables
 export const configurationValidationSchema = Joi.object({
@@ -42,8 +41,8 @@ export const configurationValidationSchema = Joi.object({
             username: configService.get<string>('database.username'),
             password: configService.get<string>('database.password'),
             database: configService.get<string>('database.database'),
-            entities: [UserTracking, UserCheckHistory],
-            synchronize: false, // Use false in production and handle migrations
+            entities: [TrackingEvent, UserTrackingSummary],
+            synchronize: true, // Use false in production and handle migrations
           };
 
           // Ensure all required fields are set in the config (you can also validate the structure here)
@@ -59,9 +58,7 @@ export const configurationValidationSchema = Joi.object({
       },
       inject: [ConfigService], // Inject ConfigService to access environment variables
     }),
-
-    UsersModule,
-    LocationModule,
+    TrackingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

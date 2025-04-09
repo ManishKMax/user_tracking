@@ -26,68 +26,107 @@ let UsersService = class UsersService {
         this.userCheckHistoryRepository = userCheckHistoryRepository;
     }
     async checkInUser(userAgent, checkinTime) {
-        const userTracking = this.userTrackingRepository.create({
-            checkin_time: checkinTime,
-            user_agent: userAgent,
-        });
-        const savedUserTracking = await this.userTrackingRepository.save(userTracking);
-        const userCheckHistory = this.userCheckHistoryRepository.create({
-            checkin_time: checkinTime,
-            userTracking: savedUserTracking,
-            user_tracking_id: savedUserTracking.id,
-            user_agent: userAgent,
-        });
-        await this.userCheckHistoryRepository.save(userCheckHistory);
-        return savedUserTracking;
+        try {
+            const userTracking = this.userTrackingRepository.create({
+                checkin_time: checkinTime,
+                user_agent: userAgent,
+            });
+            const savedUserTracking = await this.userTrackingRepository.save(userTracking);
+            const userCheckHistory = this.userCheckHistoryRepository.create({
+                checkin_time: checkinTime,
+                userTracking: savedUserTracking,
+                user_tracking_id: savedUserTracking.id,
+                user_agent: userAgent,
+            });
+            await this.userCheckHistoryRepository.save(userCheckHistory);
+            return savedUserTracking;
+        }
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Error occurred while checking in user', error);
+        }
+        finally {
+            console.log('checkInUser process completed');
+        }
     }
     async checkOutUser(userTrackingId, checkoutTime) {
-        const userTracking = await this.userTrackingRepository.findOne({ where: { id: userTrackingId } });
-        if (!userTracking) {
-            throw new common_1.NotFoundException(`UserTracking with ID ${userTrackingId} not found.`);
+        let userTracking;
+        try {
+            userTracking = await this.userTrackingRepository.findOne({ where: { id: userTrackingId } });
+            if (!userTracking) {
+                throw new common_1.NotFoundException(`UserTracking with ID ${userTrackingId} not found.`);
+            }
+            userTracking.checkout_time = checkoutTime;
+            await this.userTrackingRepository.save(userTracking);
+            const userCheckHistory = await this.userCheckHistoryRepository.findOne({
+                where: { user_tracking_id: userTrackingId, checkout_time: (0, typeorm_2.IsNull)() },
+            });
+            if (userCheckHistory) {
+                userCheckHistory.checkout_time = new Date(checkoutTime);
+                await this.userCheckHistoryRepository.save(userCheckHistory);
+            }
+            return userTracking;
         }
-        userTracking.checkout_time = checkoutTime;
-        await this.userTrackingRepository.save(userTracking);
-        const userCheckHistory = await this.userCheckHistoryRepository.findOne({
-            where: { user_tracking_id: userTrackingId, checkout_time: (0, typeorm_2.IsNull)() },
-        });
-        if (userCheckHistory) {
-            userCheckHistory.checkout_time = new Date(checkoutTime);
-            await this.userCheckHistoryRepository.save(userCheckHistory);
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Error occurred while checking out user', error);
         }
-        return userTracking;
+        finally {
+            console.log('checkOutUser process completed');
+        }
     }
     async startBreak(userTrackingId, breakStart) {
-        const userTracking = await this.userTrackingRepository.findOne({ where: { id: userTrackingId } });
-        if (!userTracking) {
-            throw new common_1.NotFoundException(`UserTracking with ID ${userTrackingId} not found.`);
+        let userTracking;
+        try {
+            userTracking = await this.userTrackingRepository.findOne({ where: { id: userTrackingId } });
+            if (!userTracking) {
+                throw new common_1.NotFoundException(`UserTracking with ID ${userTrackingId} not found.`);
+            }
+            const userCheckHistory = this.userCheckHistoryRepository.create({
+                break_start: breakStart,
+                userTracking: userTracking,
+                user_tracking_id: userTracking.id,
+                user_agent: userTracking.user_agent,
+            });
+            return await this.userCheckHistoryRepository.save(userCheckHistory);
         }
-        const userCheckHistory = this.userCheckHistoryRepository.create({
-            break_start: breakStart,
-            userTracking: userTracking,
-            user_tracking_id: userTracking.id,
-            user_agent: userTracking.user_agent,
-        });
-        return await this.userCheckHistoryRepository.save(userCheckHistory);
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Error occurred while starting break', error);
+        }
+        finally {
+            console.log('startBreak process completed');
+        }
     }
     async resumeBreak(userTrackingId, resumeAt) {
-        const userTracking = await this.userTrackingRepository.findOne({ where: { id: userTrackingId } });
-        if (!userTracking) {
-            throw new common_1.NotFoundException(`UserTracking with ID ${userTrackingId} not found.`);
+        let userTracking;
+        try {
+            userTracking = await this.userTrackingRepository.findOne({ where: { id: userTrackingId } });
+            if (!userTracking) {
+                throw new common_1.NotFoundException(`UserTracking with ID ${userTrackingId} not found.`);
+            }
+            const userCheckHistory = await this.userCheckHistoryRepository.findOne({
+                where: { user_tracking_id: userTrackingId, break_start: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
+            });
+            if (userCheckHistory) {
+                userCheckHistory.resume_at = new Date(resumeAt);
+                await this.userCheckHistoryRepository.save(userCheckHistory);
+            }
+            let totalBreakTime = '0';
+            const breakEntries = await this.userCheckHistoryRepository.find({
+                where: { user_tracking_id: userTrackingId, break_start: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) },
+            });
+            totalBreakTime = breakEntries.reduce((total, entry) => {
+                return total;
+            }, totalBreakTime);
+            userTracking.break_time = totalBreakTime;
+            userTracking.break_resume_time = resumeAt;
+            await this.userTrackingRepository.save(userTracking);
+            return userTracking;
         }
-        const userCheckHistory = await this.userCheckHistoryRepository.findOne({ where: { user_tracking_id: userTrackingId, break_start: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) } });
-        if (userCheckHistory) {
-            userCheckHistory.resume_at = new Date(resumeAt);
-            await this.userCheckHistoryRepository.save(userCheckHistory);
+        catch (error) {
+            throw new common_1.InternalServerErrorException('Error occurred while resuming break', error);
         }
-        let totalBreakTime = '0';
-        const breakEntries = await this.userCheckHistoryRepository.find({ where: { user_tracking_id: userTrackingId, break_start: (0, typeorm_2.Not)((0, typeorm_2.IsNull)()) } });
-        totalBreakTime = breakEntries.reduce((total, entry) => {
-            return total;
-        }, totalBreakTime);
-        userTracking.break_time = totalBreakTime;
-        userTracking.break_resume_time = resumeAt;
-        await this.userTrackingRepository.save(userTracking);
-        return userTracking;
+        finally {
+            console.log('resumeBreak process completed');
+        }
     }
 };
 exports.UsersService = UsersService;

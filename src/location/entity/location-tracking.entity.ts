@@ -16,9 +16,6 @@ export class LocationTracking {
   long: string;  // Maps to the 'long' column in your table
 
   @Column()
-  created: Timestamp;  // Maps to the 'created' column in your table
-
-  @Column()
   userAgent: string;  // Maps to the 'user_agent' column in your table
 
   @Column()
@@ -26,4 +23,7 @@ export class LocationTracking {
 
   @Column()
   userTrackingId: number;  // Maps to the 'user_tracking_id' column in your table
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created: Date;
 }
