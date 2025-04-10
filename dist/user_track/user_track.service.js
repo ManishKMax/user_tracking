@@ -17,17 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const tracking_event_1 = require("./entities/tracking-event/tracking-event");
-const user_tracking_summary_1 = require("./entities/user-tracking-summary/user-tracking-summary");
-const event_type_enum_1 = require("./event-type.enum");
 let TrackingService = class TrackingService {
     trackingEventRepository;
-    trackingSummaryRepository;
-    constructor(trackingEventRepository, trackingSummaryRepository) {
+    constructor(trackingEventRepository) {
         this.trackingEventRepository = trackingEventRepository;
-        this.trackingSummaryRepository = trackingSummaryRepository;
     }
     async createTrackingEvent(eventData, userId, userAgent, projectId) {
-        console.log('TimeStam11p:', eventData.timestamp);
         if (eventData.timestamp) {
             if (typeof eventData.timestamp === 'string') {
                 eventData.timestamp = new Date(eventData.timestamp);
@@ -44,92 +39,26 @@ let TrackingService = class TrackingService {
         eventData.user_agent = userAgent;
         eventData.timestamp = new Date(eventData.timestamp);
         const event = await this.trackingEventRepository.save(eventData);
-        console.log('Saved Event:', event);
-        const date = event.timestamp.toISOString().split('T')[0];
-        let summary = await this.trackingSummaryRepository.findOne({
-            where: { user_id: userId, date },
-        });
-        if (!summary) {
-            summary = this.trackingSummaryRepository.create({
+        console.log('✅ Tracking Event Saved:', event);
+        return event;
+    }
+    async getEventsByUserProjectAndDate(userId, projectId, date) {
+        const startOfDay = new Date(`${date}T00:00:00Z`);
+        const endOfDay = new Date(`${date}T23:59:59Z`);
+        return this.trackingEventRepository.find({
+            where: {
                 user_id: userId,
                 project_id: projectId,
-                user_agent: userAgent,
-                created: event.timestamp,
-                date,
-                break_resume_time: [],
-            });
-        }
-        console.log('Event Type:', event.event_type);
-        switch (event.event_type) {
-            case event_type_enum_1.EventType.CheckIn:
-                if (summary.checkin_checkout_time && summary.checkin_checkout_time.length > 0) {
-                    const lastEntry = summary.checkin_checkout_time[summary.checkin_checkout_time.length - 1];
-                    if (lastEntry.checkout === null) {
-                        summary.checkin_checkout_time.push({
-                            checkin: event.timestamp.toISOString(),
-                            checkout: null,
-                        });
-                    }
-                    else {
-                        summary.checkin_checkout_time.push({
-                            checkin: event.timestamp.toISOString(),
-                            checkout: null,
-                        });
-                    }
-                }
-                else {
-                    summary.checkin_checkout_time = [
-                        { checkin: event.timestamp.toISOString(), checkout: null },
-                    ];
-                }
-                summary.checkin = event.timestamp;
-                break;
-            case event_type_enum_1.EventType.CheckOut:
-                summary.checkout = event.timestamp;
-                if (summary.checkin && summary.checkout) {
-                    const checkin = new Date(summary.checkin).getTime();
-                    const checkout = new Date(summary.checkout).getTime();
-                    summary.total_hours_worked = (checkout - checkin) / (1000 * 60);
-                }
-                const lastcheckin = summary.checkin_checkout_time.find(b => b.checkout === null);
-                if (lastcheckin) {
-                    lastcheckin.checkout = event.timestamp.toISOString();
-                    const startTime = new Date(lastcheckin.checkin).getTime();
-                    const endTime = new Date(lastcheckin.checkout).getTime();
-                    const breakDuration = (endTime - startTime) / (1000 * 60);
-                    summary.totalbreak += breakDuration;
-                }
-                break;
-            case event_type_enum_1.EventType.BreakTime:
-                summary.break_resume_time.push({
-                    start: event.timestamp.toISOString(),
-                    end: null,
-                });
-                break;
-            case event_type_enum_1.EventType.ResumeTime:
-                const lastBreak = summary.break_resume_time.find(b => b.end === null);
-                if (lastBreak) {
-                    lastBreak.end = event.timestamp.toISOString();
-                    const startTime = new Date(lastBreak.start).getTime();
-                    const endTime = new Date(lastBreak.end).getTime();
-                    const breakDuration = (endTime - startTime) / (1000 * 60);
-                    summary.totalbreak += breakDuration;
-                }
-                break;
-            default:
-                console.log('Unhandled event type:', event.event_type);
-                break;
-        }
-        await this.trackingSummaryRepository.save(summary);
-        return event;
+                timestamp: (0, typeorm_2.Between)(startOfDay, endOfDay),
+            },
+            order: { timestamp: 'ASC' },
+        });
     }
 };
 exports.TrackingService = TrackingService;
 exports.TrackingService = TrackingService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(tracking_event_1.TrackingEvent)),
-    __param(1, (0, typeorm_1.InjectRepository)(user_tracking_summary_1.UserTrackingSummary)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], TrackingService);
 //# sourceMappingURL=user_track.service.js.map

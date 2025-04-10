@@ -8,6 +8,7 @@ import configuration from './common/config/configuration';
 import { TrackingEvent } from './user_track/entities/tracking-event/tracking-event';
 import { UserTrackingSummary } from './user_track/entities/user-tracking-summary/user-tracking-summary';
 import { TrackingModule } from './user_track/user_track.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Validation for environment variables
 export const configurationValidationSchema = Joi.object({
@@ -59,6 +60,7 @@ export const configurationValidationSchema = Joi.object({
       inject: [ConfigService], // Inject ConfigService to access environment variables
     }),
     TrackingModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

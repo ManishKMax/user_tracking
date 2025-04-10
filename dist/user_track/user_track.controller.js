@@ -26,6 +26,19 @@ let UserTrackController = class UserTrackController {
         }
         return this.trackingService.createTrackingEvent(eventData, userId, userAgent, projectId);
     }
+    async getTrackingEvents(userId, projectId, date) {
+        if (!userId || !projectId) {
+            throw new common_1.BadRequestException('user_id and project_id headers are required');
+        }
+        const targetDate = date || new Date().toISOString().split('T')[0];
+        const events = await this.trackingService.getEventsByUserProjectAndDate(userId, projectId, targetDate);
+        return {
+            message: '✅ Events fetched successfully',
+            date: targetDate,
+            total: events.length,
+            events,
+        };
+    }
 };
 exports.UserTrackController = UserTrackController;
 __decorate([
@@ -38,6 +51,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", void 0)
 ], UserTrackController.prototype, "createTrackingEvent", null);
+__decorate([
+    (0, common_1.Get)('events'),
+    __param(0, (0, common_1.Headers)('user_id')),
+    __param(1, (0, common_1.Headers)('project_id')),
+    __param(2, (0, common_1.Query)('date')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], UserTrackController.prototype, "getTrackingEvents", null);
 exports.UserTrackController = UserTrackController = __decorate([
     (0, common_1.Controller)('user-track'),
     __metadata("design:paramtypes", [user_track_service_1.TrackingService])

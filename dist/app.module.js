@@ -17,6 +17,7 @@ const configuration_1 = require("./common/config/configuration");
 const tracking_event_1 = require("./user_track/entities/tracking-event/tracking-event");
 const user_tracking_summary_1 = require("./user_track/entities/user-tracking-summary/user-tracking-summary");
 const user_track_module_1 = require("./user_track/user_track.module");
+const schedule_1 = require("@nestjs/schedule");
 exports.configurationValidationSchema = Joi.object({
     DATABASE_TYPE: Joi.string().valid('mysql', 'postgres').required(),
     DATABASE_HOST: Joi.string().required(),
@@ -63,6 +64,7 @@ exports.AppModule = AppModule = __decorate([
                 inject: [config_1.ConfigService],
             }),
             user_track_module_1.TrackingModule,
+            schedule_1.ScheduleModule.forRoot(),
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

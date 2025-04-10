@@ -10,9 +10,10 @@ exports.TrackingModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const tracking_event_1 = require("./entities/tracking-event/tracking-event");
-const user_tracking_summary_1 = require("./entities/user-tracking-summary/user-tracking-summary");
 const user_track_service_1 = require("./user_track.service");
 const user_track_controller_1 = require("./user_track.controller");
+const summary_scheduler_service_ts_service_1 = require("./summary-scheduler.service.ts.service");
+const user_tracking_summary_1 = require("./entities/user-tracking-summary/user-tracking-summary");
 let TrackingModule = class TrackingModule {
 };
 exports.TrackingModule = TrackingModule;
@@ -22,7 +23,7 @@ exports.TrackingModule = TrackingModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([tracking_event_1.TrackingEvent, user_tracking_summary_1.UserTrackingSummary]),
         ],
         controllers: [user_track_controller_1.UserTrackController],
-        providers: [user_track_service_1.TrackingService],
+        providers: [user_track_service_1.TrackingService, summary_scheduler_service_ts_service_1.SummarySchedulerService],
     })
 ], TrackingModule);
 //# sourceMappingURL=user_track.module.js.map
