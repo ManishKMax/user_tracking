@@ -15,62 +15,69 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallTrackingController = void 0;
 const common_1 = require("@nestjs/common");
 const call_tracking_service_1 = require("./call-tracking.service");
-const call_tracking_entity_1 = require("./call-tracking.entity");
+const create_call_tracking_dto_1 = require("./dto/create-call-tracking.dto");
+const find_call_tracking_dto_1 = require("./dto/find-call-tracking.dto");
 let CallTrackingController = class CallTrackingController {
     callTrackingService;
     constructor(callTrackingService) {
         this.callTrackingService = callTrackingService;
     }
-    create(createData) {
-        return this.callTrackingService.create(createData);
+    create(user_id, project_id, user_agent, body) {
+        const data = {
+            ...body,
+            user_id,
+            project_id,
+            user_agent,
+        };
+        return this.callTrackingService.create(data);
     }
-    findAll() {
-        return this.callTrackingService.findAll();
+    findAll(user_id, project_id, dateRangeDto) {
+        const { from_date, to_date } = dateRangeDto;
+        return this.callTrackingService.findAll(user_id, project_id, from_date, to_date);
     }
-    findOne(id) {
-        return this.callTrackingService.findOne(id);
+    findOne(user_id, project_id, id) {
+        return this.callTrackingService.findOne(id, user_id, project_id);
     }
-    update(id, updateData) {
-        return this.callTrackingService.update(id, updateData);
-    }
-    remove(id) {
-        return this.callTrackingService.remove(id);
+    remove(user_id, project_id, id) {
+        return this.callTrackingService.remove(id, user_id, project_id);
     }
 };
 exports.CallTrackingController = CallTrackingController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Headers)('user_id')),
+    __param(1, (0, common_1.Headers)('project_id')),
+    __param(2, (0, common_1.Headers)('user_agent')),
+    __param(3, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [call_tracking_entity_1.CallTracking]),
+    __metadata("design:paramtypes", [String, String, String, create_call_tracking_dto_1.CreateCallTrackingDto]),
     __metadata("design:returntype", void 0)
 ], CallTrackingController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Post)('find'),
+    __param(0, (0, common_1.Headers)('user_id')),
+    __param(1, (0, common_1.Headers)('project_id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String, find_call_tracking_dto_1.FindCallTrackingDto]),
     __metadata("design:returntype", void 0)
 ], CallTrackingController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)('find-one'),
+    __param(0, (0, common_1.Headers)('user_id')),
+    __param(1, (0, common_1.Headers)('project_id')),
+    __param(2, (0, common_1.Body)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String, String, Number]),
     __metadata("design:returntype", void 0)
 ], CallTrackingController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Post)('delete'),
+    __param(0, (0, common_1.Headers)('user_id')),
+    __param(1, (0, common_1.Headers)('project_id')),
+    __param(2, (0, common_1.Body)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
-    __metadata("design:returntype", void 0)
-], CallTrackingController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String, String, Number]),
     __metadata("design:returntype", void 0)
 ], CallTrackingController.prototype, "remove", null);
 exports.CallTrackingController = CallTrackingController = __decorate([

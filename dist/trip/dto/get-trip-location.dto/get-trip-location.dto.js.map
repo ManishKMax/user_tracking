@@ -1,0 +1,1 @@
+{"version":3,"file":"get-trip-location.dto.js","sourceRoot":"","sources":["../../../../src/trip/dto/get-trip-location.dto/get-trip-location.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAA2C;AAE3C,MAAa,kBAAkB;IAE7B,OAAO,CAAS;IAGhB,UAAU,CAAS;IAGnB,IAAI,CAAS;CACd;AATD,gDASC;AAPC;IADC,IAAA,0BAAQ,GAAE;;mDACK;AAGhB;IADC,IAAA,0BAAQ,GAAE;;sDACQ;AAGnB;IADC,IAAA,0BAAQ,GAAE;;gDACE"}

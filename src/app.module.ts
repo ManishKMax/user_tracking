@@ -5,12 +5,23 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import configuration from './common/config/configuration';
+
+// Existing entities
 import { TrackingEvent } from './user_track/entities/tracking-event/tracking-event';
 import { UserTrackingSummary } from './user_track/entities/user-tracking-summary/user-tracking-summary';
+import { CallTracking } from './call-tracking/entities/call-tracking.entity';
+
+// Trip-related modules and entities
+import { TripModule } from './trip/trip.module';
+import { Trip } from './trip/entities/trip/trip.entity';
+import { TripLocation } from './trip/entities/trip-location/trip-location.entity';
+
+// Other modules
 import { TrackingModule } from './user_track/user_track.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CallTrackingModule } from './call-tracking/call-tracking.module';
 
-// Validation for environment variables
+// Validation schema for environment variables
 export const configurationValidationSchema = Joi.object({
   DATABASE_TYPE: Joi.string().valid('mysql', 'postgres').required(),
   DATABASE_HOST: Joi.string().required(),
@@ -22,31 +33,35 @@ export const configurationValidationSchema = Joi.object({
 
 @Module({
   imports: [
-    // ConfigModule with validation schema
+    // ConfigModule to load environment variables with validation
     ConfigModule.forRoot({
       load: [configuration],
-      validationSchema: configurationValidationSchema, // Validate environment variables
-      isGlobal: true, // Make config globally available
+      validationSchema: configurationValidationSchema,
+      isGlobal: true,
     }),
 
-    // TypeORM configuration using async for dynamic loading from environment
+    // Database connection using TypeORM
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // Import ConfigModule to access ConfigService
+      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         try {
-          // Access environment variables with validation
           const dbConfig = {
-            type: configService.get<string>('database.type') as 'mysql', // MySQL type
+            type: configService.get<string>('database.type') as 'mysql',
             host: configService.get<string>('database.host'),
             port: configService.get<number>('database.port'),
             username: configService.get<string>('database.username'),
             password: configService.get<string>('database.password'),
             database: configService.get<string>('database.database'),
-            entities: [TrackingEvent, UserTrackingSummary],
-            synchronize: true, // Use false in production and handle migrations
+            entities: [
+              TrackingEvent,
+              UserTrackingSummary,
+              CallTracking,
+              Trip,
+              TripLocation,
+            ],
+            synchronize: true, // Turn off in production
           };
 
-          // Ensure all required fields are set in the config (you can also validate the structure here)
           if (!dbConfig.host || !dbConfig.username || !dbConfig.password || !dbConfig.database) {
             throw new Error('Missing required database configuration');
           }
@@ -54,13 +69,17 @@ export const configurationValidationSchema = Joi.object({
           return dbConfig;
         } catch (error) {
           console.error('Error while loading database configuration:', error.message);
-          process.exit(1); // Exit the application if database configuration is invalid
+          process.exit(1); // Exit app on error
         }
       },
-      inject: [ConfigService], // Inject ConfigService to access environment variables
+      inject: [ConfigService],
     }),
+
+    // Feature Modules
     TrackingModule,
+    CallTrackingModule,
     ScheduleModule.forRoot(),
+    TripModule,
   ],
   controllers: [AppController],
   providers: [AppService],

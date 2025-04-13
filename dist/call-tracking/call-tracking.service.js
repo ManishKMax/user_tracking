@@ -16,30 +16,46 @@ exports.CallTrackingService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
-const call_tracking_entity_1 = require("./call-tracking.entity");
+const call_tracking_entity_1 = require("./entities/call-tracking.entity");
+const dayjs = require("dayjs");
 let CallTrackingService = class CallTrackingService {
-    callTrackingRepository;
-    constructor(callTrackingRepository) {
-        this.callTrackingRepository = callTrackingRepository;
+    callRepo;
+    constructor(callRepo) {
+        this.callRepo = callRepo;
     }
-    create(callTracking) {
-        return this.callTrackingRepository.save(callTracking);
+    create(data) {
+        const call = this.callRepo.create(data);
+        return this.callRepo.save(call);
     }
-    findAll() {
-        return this.callTrackingRepository.find();
-    }
-    async findOne(id) {
-        const record = await this.callTrackingRepository.findOneBy({ id });
-        if (!record) {
-            throw new common_1.NotFoundException(`CallTracking with ID ${id} not found`);
+    async findAll(user_id, project_id, from_date, to_date) {
+        let start;
+        let end;
+        if (from_date && to_date) {
+            start = new Date(from_date);
+            end = new Date(to_date);
         }
-        return record;
+        else {
+            const now = dayjs();
+            start = now.startOf('day').toDate();
+            end = now.endOf('day').toDate();
+        }
+        return this.callRepo.find({
+            where: {
+                user_id,
+                project_id,
+                create_date: (0, typeorm_2.Between)(start, end),
+            },
+            order: { create_date: 'DESC' },
+        });
     }
-    update(id, updateData) {
-        return this.callTrackingRepository.update(id, updateData).then(() => { });
+    findOne(id, user_id, project_id) {
+        return this.callRepo.findOne({
+            where: { id, user_id, project_id },
+        });
     }
-    remove(id) {
-        return this.callTrackingRepository.delete(id).then(() => { });
+    async remove(id, user_id, project_id) {
+        await this.callRepo.delete({ id, user_id, project_id });
+        return { deleted: true };
     }
 };
 exports.CallTrackingService = CallTrackingService;

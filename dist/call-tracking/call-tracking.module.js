@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallTrackingModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const call_tracking_entity_1 = require("./call-tracking.entity");
+const call_tracking_entity_1 = require("./entities/call-tracking.entity");
 const call_tracking_service_1 = require("./call-tracking.service");
 const call_tracking_controller_1 = require("./call-tracking.controller");
 let CallTrackingModule = class CallTrackingModule {

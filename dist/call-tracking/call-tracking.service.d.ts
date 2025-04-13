@@ -1,11 +1,12 @@
 import { Repository } from 'typeorm';
-import { CallTracking } from './call-tracking.entity';
+import { CallTracking } from './entities/call-tracking.entity';
 export declare class CallTrackingService {
-    private callTrackingRepository;
-    constructor(callTrackingRepository: Repository<CallTracking>);
-    create(callTracking: CallTracking): Promise<CallTracking>;
-    findAll(): Promise<CallTracking[]>;
-    findOne(id: number): Promise<CallTracking>;
-    update(id: number, updateData: Partial<CallTracking>): Promise<void>;
-    remove(id: number): Promise<void>;
+    private callRepo;
+    constructor(callRepo: Repository<CallTracking>);
+    create(data: Partial<CallTracking>): Promise<CallTracking>;
+    findAll(user_id: string, project_id: string, from_date?: string, to_date?: string): Promise<CallTracking[]>;
+    findOne(id: number, user_id: string, project_id: string): Promise<CallTracking | null>;
+    remove(id: number, user_id: string, project_id: string): Promise<{
+        deleted: boolean;
+    }>;
 }

@@ -16,8 +16,13 @@ const Joi = require("joi");
 const configuration_1 = require("./common/config/configuration");
 const tracking_event_1 = require("./user_track/entities/tracking-event/tracking-event");
 const user_tracking_summary_1 = require("./user_track/entities/user-tracking-summary/user-tracking-summary");
+const call_tracking_entity_1 = require("./call-tracking/entities/call-tracking.entity");
+const trip_module_1 = require("./trip/trip.module");
+const trip_entity_1 = require("./trip/entities/trip/trip.entity");
+const trip_location_entity_1 = require("./trip/entities/trip-location/trip-location.entity");
 const user_track_module_1 = require("./user_track/user_track.module");
 const schedule_1 = require("@nestjs/schedule");
+const call_tracking_module_1 = require("./call-tracking/call-tracking.module");
 exports.configurationValidationSchema = Joi.object({
     DATABASE_TYPE: Joi.string().valid('mysql', 'postgres').required(),
     DATABASE_HOST: Joi.string().required(),
@@ -48,7 +53,13 @@ exports.AppModule = AppModule = __decorate([
                             username: configService.get('database.username'),
                             password: configService.get('database.password'),
                             database: configService.get('database.database'),
-                            entities: [tracking_event_1.TrackingEvent, user_tracking_summary_1.UserTrackingSummary],
+                            entities: [
+                                tracking_event_1.TrackingEvent,
+                                user_tracking_summary_1.UserTrackingSummary,
+                                call_tracking_entity_1.CallTracking,
+                                trip_entity_1.Trip,
+                                trip_location_entity_1.TripLocation,
+                            ],
                             synchronize: true,
                         };
                         if (!dbConfig.host || !dbConfig.username || !dbConfig.password || !dbConfig.database) {
@@ -64,7 +75,9 @@ exports.AppModule = AppModule = __decorate([
                 inject: [config_1.ConfigService],
             }),
             user_track_module_1.TrackingModule,
+            call_tracking_module_1.CallTrackingModule,
             schedule_1.ScheduleModule.forRoot(),
+            trip_module_1.TripModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

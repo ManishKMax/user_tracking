@@ -1,11 +1,13 @@
 import { CallTrackingService } from './call-tracking.service';
-import { CallTracking } from './call-tracking.entity';
+import { CreateCallTrackingDto } from './dto/create-call-tracking.dto';
+import { FindCallTrackingDto } from './dto/find-call-tracking.dto';
 export declare class CallTrackingController {
     private readonly callTrackingService;
     constructor(callTrackingService: CallTrackingService);
-    create(createData: CallTracking): Promise<CallTracking>;
-    findAll(): Promise<CallTracking[]>;
-    findOne(id: number): Promise<CallTracking>;
-    update(id: number, updateData: Partial<CallTracking>): Promise<void>;
-    remove(id: number): Promise<void>;
+    create(user_id: string, project_id: string, user_agent: string, body: CreateCallTrackingDto): Promise<import("./entities/call-tracking.entity").CallTracking>;
+    findAll(user_id: string, project_id: string, dateRangeDto: FindCallTrackingDto): Promise<import("./entities/call-tracking.entity").CallTracking[]>;
+    findOne(user_id: string, project_id: string, id: number): Promise<import("./entities/call-tracking.entity").CallTracking | null>;
+    remove(user_id: string, project_id: string, id: number): Promise<{
+        deleted: boolean;
+    }>;
 }
