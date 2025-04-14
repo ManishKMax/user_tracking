@@ -1,12 +1,15 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CommonHeaderDto {
+  @IsNotEmpty()
   @IsString()
-  user_agent: string;
+  project_id: string;
 
+  @IsNotEmpty()
   @IsString()
   user_id: string;
 
+  @IsNotEmpty()
   @IsString()
-  project_id: string;
+  user_agent: string;
 }
