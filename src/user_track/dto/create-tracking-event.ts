@@ -1,10 +1,11 @@
-import { IsString, IsDateString } from 'class-validator';
+import { IsString, IsDateString, IsOptional } from 'class-validator';
 
 export class CreateTrackingEventDto {
   @IsString()
   user_id: string;
 
   @IsDateString()
+  @IsOptional()
   timestamp: Date;
 
   @IsString()

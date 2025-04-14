@@ -8,6 +8,7 @@ import {
 import { CallTrackingService } from './call-tracking.service';
 import { CreateCallTrackingDto } from './dto/create-call-tracking.dto';
 import { FindCallTrackingDto } from './dto/find-call-tracking.dto';
+import { CommonHeaderDto } from 'src/common/dto/common-headers.dto';
 
 @Controller('call-tracking')
 export class CallTrackingController {
@@ -15,45 +16,39 @@ export class CallTrackingController {
 
   @Post()
   create(
-    @Headers('user_id') user_id: string,
-    @Headers('project_id') project_id: string,
-    @Headers('user_agent') user_agent: string,
+    @Headers() headers: CommonHeaderDto,
     @Body() body: CreateCallTrackingDto,
   ) {
+
     const data = {
       ...body,
-      user_id,
-      project_id,
-      user_agent,
+      headers
     };
     return this.callTrackingService.create(data);
   }
 
   @Post('find')
   findAll(
-    @Headers('user_id') user_id: string,
-    @Headers('project_id') project_id: string,
+    @Headers() headers: CommonHeaderDto,
     @Body() dateRangeDto: FindCallTrackingDto,
   ) {
     const { from_date, to_date } = dateRangeDto;
-    return this.callTrackingService.findAll(user_id, project_id, from_date, to_date);
+    return this.callTrackingService.findAll(headers.user_id, headers.project_id, from_date, to_date);
   }
 
   @Post('find-one')
   findOne(
-    @Headers('user_id') user_id: string,
-    @Headers('project_id') project_id: string,
+    @Headers() headers: CommonHeaderDto,
     @Body('id') id: number,
   ) {
-    return this.callTrackingService.findOne(id, user_id, project_id);
+    return this.callTrackingService.findOne(id, headers.user_id, headers.project_id);
   }
 
   @Post('delete')
   remove(
-    @Headers('user_id') user_id: string,
-    @Headers('project_id') project_id: string,
+    @Headers() headers: CommonHeaderDto,
     @Body('id') id: number,
   ) {
-    return this.callTrackingService.remove(id, user_id, project_id);
+    return this.callTrackingService.remove(id, headers.user_id, headers.project_id,);
   }
 }

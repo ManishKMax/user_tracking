@@ -1,49 +1,39 @@
-import { Body, Controller, Post, Headers, BadRequestException, Get, Query } from '@nestjs/common';
+import { Body, Controller, Post, Headers, BadRequestException, Get, Query, UsePipes } from '@nestjs/common';
 import { TrackingService } from './user_track.service';
-import { TrackingEvent } from './entities/tracking-event/tracking-event';
+import { TrackingEvent } from './entities/tracking-event';
+import { ValidateHeadersPipe } from 'src/common/pipes/validate-headers.pipe';
+import { CommonHeaderDto } from 'src/common/dto/common-headers.dto';
 
 @Controller('user-track')
 export class UserTrackController {
     constructor(private readonly trackingService: TrackingService) {}
 
     @Post('event')
-    createTrackingEvent(
-      @Body() eventData: Partial<TrackingEvent>,
-      @Headers('user_id') userId: string,
-      @Headers('user_agent') userAgent: string,
-      @Headers('project_id') projectId: string,
+    @UsePipes(new ValidateHeadersPipe(CommonHeaderDto))
+    async createTrackingEvent(
+      @Body() eventData: Partial<TrackingEvent>, // Data from the body
+      @Headers() headers: CommonHeaderDto, // Headers will be validated and passed as a DTO
     ) {
-      // Header validation
-      if (!userId || !userAgent || !projectId) {
-        throw new BadRequestException('Headers cannot have null values');
-      }
-  
+      // Now, you can pass validated headers to your service
       return this.trackingService.createTrackingEvent(
         eventData,
-        userId,
-        userAgent,
-        projectId,
+        headers
       );
     }
 
 
-    @Get('events')
+    @Post('get-events')
+    @UsePipes(new ValidateHeadersPipe(CommonHeaderDto)) // Validate headers
     async getTrackingEvents(
-      @Headers('user_id') userId: string,
-      @Headers('project_id') projectId: string,
-      @Query('date') date?: string,
+      @Body() body: { date?: string }, // Accepting 'date' in the body
+      @Headers() headers: CommonHeaderDto, // Injecting validated headers as a DTO
     ) {
-      // Validate headers
-      if (!userId || !projectId) {
-        throw new BadRequestException('user_id and project_id headers are required');
-      }
-  
+      
       // Default to today's date (UTC) if no date is provided
-      const targetDate = date || new Date().toISOString().split('T')[0];
+      const targetDate = body.date || new Date().toISOString().split('T')[0];
   
       const events = await this.trackingService.getEventsByUserProjectAndDate(
-        userId,
-        projectId,
+        headers,
         targetDate,
       );
   

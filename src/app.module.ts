@@ -7,8 +7,8 @@ import * as Joi from 'joi';
 import configuration from './common/config/configuration';
 
 // Existing entities
-import { TrackingEvent } from './user_track/entities/tracking-event/tracking-event';
-import { UserTrackingSummary } from './user_track/entities/user-tracking-summary/user-tracking-summary';
+import { TrackingEvent } from './user_track/entities/tracking-event';
+import { UserTrackingSummary } from './user_track/entities/user-tracking-summary';
 import { CallTracking } from './call-tracking/entities/call-tracking.entity';
 
 // Trip-related modules and entities

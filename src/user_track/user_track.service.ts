@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import { TrackingEvent } from './entities/tracking-event/tracking-event';
+import { TrackingEvent } from './entities/tracking-event';
+import { CommonHeaderDto } from 'src/common/dto/common-headers.dto';
 
 @Injectable()
 export class TrackingService {
@@ -12,9 +13,7 @@ export class TrackingService {
 
   async createTrackingEvent(
     eventData: Partial<TrackingEvent>,
-    userId: string,
-    userAgent: string,
-    projectId: string,
+    eventHeader: CommonHeaderDto
   ) {
     // Validate and set timestamp
     if (eventData.timestamp) {
@@ -28,9 +27,9 @@ export class TrackingService {
     }
 
     // Assign metadata
-    eventData.user_id = userId;
-    eventData.project_id = projectId;
-    eventData.user_agent = userAgent;
+    eventData.user_id = eventHeader.user_id;
+    eventData.project_id = eventHeader.project_id;
+    eventData.user_agent = eventHeader.user_agent;
     eventData.timestamp = new Date(eventData.timestamp); // Re-assign to ensure immutability
 
     // Save tracking event
@@ -40,14 +39,14 @@ export class TrackingService {
   }
 
   
-  async getEventsByUserProjectAndDate(userId: string, projectId: string, date: string) {
+  async getEventsByUserProjectAndDate(header:CommonHeaderDto, date: string) {
     const startOfDay = new Date(`${date}T00:00:00Z`);
     const endOfDay = new Date(`${date}T23:59:59Z`);
   
     return this.trackingEventRepository.find({
       where: {
-        user_id: userId,
-        project_id: projectId,
+        user_id: header.user_id,
+        project_id: header.project_id,
         timestamp: Between(startOfDay, endOfDay),
       },
       order: { timestamp: 'ASC' },

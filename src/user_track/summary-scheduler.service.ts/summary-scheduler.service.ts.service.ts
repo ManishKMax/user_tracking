@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TrackingEvent } from './entities/tracking-event/tracking-event';
-import { UserTrackingSummary } from './entities/user-tracking-summary/user-tracking-summary';
-import { EventType } from './event-type.enum';
+import { TrackingEvent } from '../entities/tracking-event';
+import { UserTrackingSummary } from '../entities/user-tracking-summary';
+import { EventType } from '../event-type.enum';
 import { Between } from 'typeorm';
 
 @Injectable()
