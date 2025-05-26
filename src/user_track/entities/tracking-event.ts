@@ -21,6 +21,9 @@ export class TrackingEvent {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created: Date;
 
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updated: Date;
+
   @Column()
   user_agent: string;
 

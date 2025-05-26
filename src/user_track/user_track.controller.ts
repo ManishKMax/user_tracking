@@ -34,12 +34,7 @@ export class UserTrackController {
         targetDate,
       );
   
-      return {
-        message: '✅ Events fetched successfully',
-        date: targetDate,
-        total: events.length,
-        events,
-      };
+      return events;
     }
     
     
