@@ -8,23 +8,23 @@ import { TripLocationDto } from './dto/location.dto';
 export class TripController {
   constructor(private readonly tripService: TripService) {}
 
-  @Post('start')
+  @Post('startTrip')
   startTrip(@Body() dto: StartTripDto, @Headers() headers) {
     return this.tripService.startTrip(dto, headers);
   }
 
-  @Post('end/:id')
+  @Post('endTrip/:id')
   endTrip(@Param('id') id: number, @Body() dto: EndTripDto) {
     return this.tripService.endTrip(id, dto);
   }
 
-  @Post('location')
+  @Post('addlocation')
   addLocation(@Body() dto: TripLocationDto) {
     return this.tripService.addLocation(dto);
   }
 
   // Endpoint to get trip locations by user_id, project_id from headers and date from body (using POST method)
-  @Post('locations')
+  @Post('locationsByDate')
   async getTripLocationsByDate(
     @Headers('user_id') user_id: string,
     @Headers('project_id') project_id: string,

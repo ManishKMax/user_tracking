@@ -34,6 +34,12 @@ export class ValidateHeadersInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const headers = request.headers;
 
+    // ✅ Skip header validation for specific paths
+    const skipPaths = ['/', '/health', '/docs'];
+    if (skipPaths.includes(request.path)) {
+      return next.handle();
+    }
+
     this.logger.logRequest(request.originalUrl, request.method, headers, null);
 
     try {
@@ -74,7 +80,7 @@ export class ValidateHeadersInterceptor implements NestInterceptor {
         });
       }
 
-      // Attach validated headers to request if needed
+      // Attach validated headers to request
       request.validatedHeaders = pickedHeaders;
 
       return next.handle();

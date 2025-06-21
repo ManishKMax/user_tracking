@@ -14,7 +14,7 @@ import { CommonHeaderDto } from 'src/common/dto/common-headers.dto';
 export class CallTrackingController {
   constructor(private readonly callTrackingService: CallTrackingService) {}
 
-  @Post()
+  @Post("save-calllogs")
   create(
     @Headers() headers: CommonHeaderDto,
     @Body() body: CreateCallTrackingDto,
@@ -27,7 +27,7 @@ export class CallTrackingController {
     return this.callTrackingService.create(data);
   }
 
-  @Post('find')
+  @Post('get-calllogs')
   findAll(
     @Headers() headers: CommonHeaderDto,
     @Body() dateRangeDto: FindCallTrackingDto,
@@ -36,7 +36,7 @@ export class CallTrackingController {
     return this.callTrackingService.findAll(headers.user_id, headers.project_id, from_date, to_date);
   }
 
-  @Post('find-one')
+  @Post('get-calllogsbyid')
   findOne(
     @Headers() headers: CommonHeaderDto,
     @Body('id') id: number,
